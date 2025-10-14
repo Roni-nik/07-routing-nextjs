@@ -1,4 +1,3 @@
-
 "use client";
 
 import css from "./Notes.client.module.css";
@@ -7,44 +6,67 @@ import { useDebouncedCallback } from "use-debounce";
 import { ToastContainer } from "react-toastify";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
-import { fetchNotes } from "../../lib/api";
-import { showErrorToast } from "../../components/ShowErrorToast/ShowError";
+import { fetchNotes } from "@/lib/api";
+import { showErrorToast } from "@/components/ShowErrorToast/ShowError";
 
-import NoteList from "../../components/NoteList/NoteList";
-import Pagination from "../../components/Pagination/Pagination";
-import SearchBox from "../../components/SearchBox/SearchBox";
-import Modal from "../../components/Modal/Modal";
-import NoteForm from "../../components/NoteForm/NoteForm";
+import NoteList from "@/components/NoteList/NoteList";
+import Pagination from "@/components/Pagination/Pagination";
+import SearchBox from "@/components/SearchBox/SearchBox";
+import CreateModal from "@/components/Modal/Modal";
+import NoteForm from "@/components/NoteForm/NoteForm";
+import type { NoteSearchResponse } from "@/lib/api";
+import Loader from "@/components/Loader/Loader";
 
-export default function NotesClient() {
-  // 🔹 Локальний стан (без пропсів)
+type NoteClientProps = {
+  initialData: NoteSearchResponse;
+  tag: string;
+};
+
+export default function NotesClient({ initialData, tag }: NoteClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [inputValue, setInputValue] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
 
-  // 🔹 Дебаунс пошуку
-  const updateSearchQuery = useDebouncedCallback(
-    (value: string) => setSearchQuery(value),
-    300
-  );
+  const updateSearchQuery = useDebouncedCallback((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, 300);
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
     updateSearchQuery(value);
   };
+  const queryTag = tag === "All" ? undefined : tag;
 
-  // 🔹 Отримання нотаток через React Query
-  const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ["notes", searchQuery, currentPage],
-    queryFn: () => fetchNotes(searchQuery, currentPage),
+  const { data, isLoading, isSuccess, isError } = useQuery({
+    queryKey: ["notes", searchQuery, tag, currentPage],
+    queryFn: () =>
+      fetchNotes({
+        searchQuery: searchQuery,
+        tag: queryTag,
+        page: currentPage,
+      }),
     placeholderData: keepPreviousData,
+    initialData: initialData,
   });
 
   const totalPages = data?.totalPages || 0;
+
   const noNotesToastShown = useRef(false);
 
-  // 🔹 Повідомлення про відсутність нотаток
+  const successContent = isSuccess && data?.notes?.length > 0 && (
+    <NoteList notes={data.notes} />
+  );
+
+  const loadingContent = isLoading && <Loader />;
+
+  useEffect(() => {
+    if (isError) {
+      showErrorToast("Something went wrong while fetching notes.");
+    }
+  }, [isError]);
+
   useEffect(() => {
     if (!isLoading && data && data.notes.length === 0) {
       if (!noNotesToastShown.current) {
@@ -56,10 +78,9 @@ export default function NotesClient() {
     }
   }, [data, isLoading]);
 
-  // 🔹 Скидання сторінки при новому пошуку
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, tag]);
 
   return (
     <div className={css.app}>
@@ -76,15 +97,14 @@ export default function NotesClient() {
           Create note +
         </button>
         {isModalOpen && (
-          <Modal onClose={() => setModalOpen(false)}>
+          <CreateModal onClose={() => setModalOpen(false)}>
             <NoteForm onCancel={() => setModalOpen(false)} />
-          </Modal>
+          </CreateModal>
         )}
       </header>
-      {isSuccess && <NoteList notes={data.notes} />}
+      {loadingContent}
+      {successContent}
       <ToastContainer />
     </div>
   );
 }
-
-       

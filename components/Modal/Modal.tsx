@@ -1,4 +1,6 @@
-import css from "../Modal/Modal.module.css";
+"use client";
+
+import css from "./Modal.module.css";
 import { createPortal } from "react-dom";
 import { useEffect } from "react";
 
@@ -7,7 +9,7 @@ interface Modal {
   onClose: () => void;
 }
 
-export default function Modal({ children, onClose }: Modal) {
+export default function CreateModal({ children, onClose }: Modal) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -37,6 +39,6 @@ export default function Modal({ children, onClose }: Modal) {
     >
       <div className={css.modal}>{children}</div>
     </div>,
-    document.getElementById("modal-root") as HTMLDivElement
+    document.body
   );
 }
