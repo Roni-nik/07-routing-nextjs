@@ -2,11 +2,11 @@
 import { useRouter, useParams } from "next/navigation";
 import {
   useQuery,
-  HydrationBoundary,
+  // HydrationBoundary,
   DehydratedState,
 } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { showErrorToast } from "@/components/ShowErrorToast/ShowErrorToast";
+import { showErrorToast } from "@/components/ShowErrorToast/ShowError";
 import Modal from "@/components/Modal/Modal";
 import Loader from "@/components/Loader/Loader";
 import { fetchNoteById } from "@/lib/api";
@@ -17,7 +17,7 @@ type NotePreviewProps = {
 };
 
 export default function NotePreviewModal({
-  dehydratedState,
+  // dehydratedState,
 }: NotePreviewProps) {
   const router = useRouter();
   const { id } = useParams() as { id: string };
@@ -38,7 +38,7 @@ export default function NotePreviewModal({
   }, [isError]);
 
   return (
-    <HydrationBoundary state={dehydratedState}>
+    // <HydrationBoundary state={dehydratedState}>
       <Modal onClose={close}>
         {isLoading && <Loader />}
         {data && (
@@ -57,6 +57,6 @@ export default function NotePreviewModal({
           </div>
         )}
       </Modal>
-    </HydrationBoundary>
+    // </HydrationBoundary>
   );
 }
