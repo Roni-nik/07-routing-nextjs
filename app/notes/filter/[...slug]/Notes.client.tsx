@@ -18,11 +18,11 @@ import type { NoteSearchResponse } from "@/lib/api";
 import Loader from "@/components/Loader/Loader";
 
 type NoteClientProps = {
-  initialData: NoteSearchResponse;
+
   tag: string;
 };
 
-export default function NotesClient({ initialData, tag }: NoteClientProps) {
+export default function NotesClient({ tag }: NoteClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [inputValue, setInputValue] = useState("");
@@ -48,7 +48,7 @@ export default function NotesClient({ initialData, tag }: NoteClientProps) {
         page: currentPage,
       }),
     placeholderData: keepPreviousData,
-    initialData: initialData,
+   
   });
 
   const totalPages = data?.totalPages || 0;

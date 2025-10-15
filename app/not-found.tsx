@@ -2,7 +2,7 @@ import Link from "next/link";
 import css from "./page.module.css";
 
 
-export default function NoteFoundPage() {
+export default function NotFoundPage() {
     return (
         <div className={css.container}>
             <h1 className={css.title}>404 - Page not found</h1>
